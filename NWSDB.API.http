@@ -1,0 +1,24 @@
+@NWSDB.API_HostAddress = http://localhost:5261
+
+### Health check
+GET {{NWSDB.API_HostAddress}}/healthz
+
+### Register a customer (role is always Customer)
+POST {{NWSDB.API_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "demo_customer",
+  "email": "demo@example.com",
+  "phone": "0771234567",
+  "password": "StrongPass#2026"
+}
+
+### Login
+POST {{NWSDB.API_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "demo_customer",
+  "password": "StrongPass#2026"
+}
