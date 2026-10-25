@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>National Water Supply & Drainage Board</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        @media print {
+            body * { visibility: hidden; }
+            #receipt-printable-area, #receipt-printable-area * { visibility: visible; }
+            #receipt-printable-area { position: absolute; left: 0; top: 0; width: 100%; border: none !important; box-shadow: none !important; }
+            .no-print { display: none !important; }
+        }
+
+        /* ======== UI POLISH LAYER ======== */
+        :root { --brand:#1d4ed8; --brand2:#06b6d4; --ink:#0f172a; }
+        html { scroll-behavior: smooth; }
+        body {
+            background:
+                radial-gradient(900px 500px at 8% -10%, rgba(56,189,248,.20), transparent 60%),
+                radial-gradient(800px 500px at 100% 0%, rgba(99,102,241,.16), transparent 60%),
+                radial-gradient(700px 500px at 50% 110%, rgba(20,184,166,.12), transparent 60%),
+                #f4f8fc !important;
+            background-attachment: fixed !important;
+        }
+        ::selection { background:#bae6fd; }
+        ::-webkit-scrollbar { width:10px; height:10px; }
+        ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:10px; border:2px solid #f1f5f9; }
+        ::-webkit-scrollbar-thumb:hover { background:#94a3b8; }
+
+        /* glass header with brand accent line */
+        header { background:rgba(255,255,255,.78) !important; backdrop-filter:blur(14px) saturate(160%); -webkit-backdrop-filter:blur(14px) saturate(160%); border-bottom:1px solid rgba(148,163,184,.25) !important; position:sticky; }
+        header::after { content:""; position:absolute; left:0; right:0; bottom:-1px; height:2px; background:linear-gradient(90deg,transparent,var(--brand2),var(--brand),transparent); opacity:.7; }
+
+        /* page transitions */
+        main > section:not(.hidden) { animation: viewIn .55s cubic-bezier(.2,.8,.2,1) both; }
+        @keyframes viewIn { from { opacity:0; transform:translateY(14px) scale(.99);} to { opacity:1; transform:none; } }
+
+        /* hero */
+        #view-home > div:first-child {
+            background: linear-gradient(120deg,#0b1f5c,#1e3a8a 35%,#312e81 65%,#0e7490) !important;
+            background-size:240% 240% !important; animation: heroShift 14s ease-in-out infinite;
+            box-shadow:0 30px 60px -20px rgba(30,64,175,.55) !important;
+            padding-bottom:5.5rem !important;
+        }
+        @keyframes heroShift { 0%,100%{background-position:0% 50%;} 50%{background-position:100% 50%;} }
+        #view-home h1 { background:linear-gradient(90deg,#fff,#bae6fd 70%,#a5f3fc); -webkit-background-clip:text; background-clip:text; color:transparent !important; }
+        .drop { position:absolute; border-radius:50% 50% 50% 0; transform:rotate(-45deg); background:linear-gradient(135deg,rgba(125,211,252,.55),rgba(255,255,255,.08)); animation: floaty 7s ease-in-out infinite; pointer-events:none; }
+        @keyframes floaty { 0%,100%{translate:0 0;} 50%{translate:0 -18px;} }
+        .hero-wave { position:absolute; left:0; right:0; bottom:-1px; width:100%; height:70px; pointer-events:none; }
+        .hero-wave path { animation: wave 9s ease-in-out infinite alternate; }
+        @keyframes wave { from{ transform:translateX(0);} to{ transform:translateX(-40px);} }
+
+        /* stats strip */
+        .stat-strip { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:.75rem; padding-top:.75rem; max-width:34rem; }
+        .stat { background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.18); backdrop-filter:blur(8px); border-radius:1rem; padding:.7rem .9rem; }
+        .stat b { display:block; font-size:1.25rem; font-weight:800; color:#fff; }
+        .stat span { font-size:.68rem; letter-spacing:.04em; color:#bae6fd; text-transform:uppercase; font-weight:600; }
+
+        /* cards */
+        .rounded-3xl.shadow-sm, .rounded-3xl.shadow-xl { transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; border-color:rgba(226,232,240,.9) !important; }
+        .rounded-3xl.shadow-sm:hover { transform:translateY(-4px); box-shadow:0 22px 40px -18px rgba(30,64,175,.28) !important; border-color:#bfdbfe !important; }
+        #view-home .grid > div { position:relative; overflow:hidden; }
+        #view-home .grid > div::before { content:""; position:absolute; inset:0 0 auto 0; height:3px; background:linear-gradient(90deg,var(--brand2),var(--brand)); transform:scaleX(0); transform-origin:left; transition:transform .35s ease; }
+        #view-home .grid > div:hover::before { transform:scaleX(1); }
+        #view-home .grid > div > div:first-child { transition:transform .3s ease; }
+        #view-home .grid > div:hover > div:first-child { transform:scale(1.12) rotate(-6deg); }
+
+        /* buttons */
+        button { transition: transform .15s ease, box-shadow .2s ease, filter .2s ease, background-color .2s ease; }
+        button:not(:disabled):hover { transform:translateY(-1px); }
+        button:not(:disabled):active { transform:translateY(0) scale(.98); }
+        button.bg-blue-700, button.bg-blue-600 { background-image:linear-gradient(135deg,#2563eb,#1d4ed8 60%,#4338ca) !important; }
+        button.bg-emerald-600 { background-image:linear-gradient(135deg,#10b981,#059669) !important; }
+        button.bg-blue-700:hover, button.bg-blue-600:hover, button.bg-emerald-600:hover { filter:brightness(1.08); box-shadow:0 12px 24px -10px rgba(37,99,235,.55) !important; }
+
+        /* inputs */
+        input, select, textarea { transition:border-color .2s, box-shadow .2s, background-color .2s; }
+        input:not([disabled]):focus, select:focus, textarea:focus { border-color:#60a5fa !important; box-shadow:0 0 0 4px rgba(96,165,250,.25) !important; background:#fff; }
+        input::placeholder, textarea::placeholder { color:#94a3b8; }
+
+        /* tables */
+        table { border-collapse:separate; border-spacing:0; }
+        thead th { background:#f1f5f9; color:#475569; text-transform:uppercase; font-size:.65rem; letter-spacing:.06em; }
+        tbody tr { transition:background-color .15s; }
+        tbody tr:hover { background:#eff6ff; }
+
+        /* toast + footer */
+        #toast { backdrop-filter:blur(10px); background:rgba(15,23,42,.92) !important; border:1px solid rgba(255,255,255,.12); }
+        footer { background:transparent !important; border-top:1px solid rgba(148,163,184,.25) !important; }
+
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation:none !important; transition:none !important; } }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- Global Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform transition-all duration-300 translate-y-20 opacity-0 pointer-events-none bg-slate-900 text-white text-xs font-semibold px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3">
+        <span id="toast-icon">ℹ️</span>
+        <span id="toast-msg">Notification</span>
+    </div>
+
+    <!-- Top Global Navigation Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm no-print">
+        <div class="max-w-7xl mx-auto px-6 py-3.5 flex justify-between items-center">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="showLandingHome()">
+                <div class="w-10 h-10 bg-gradient-to-tr from-blue-700 to-cyan-500 rounded-xl flex items-center justify-center font-extrabold text-white text-lg shadow-md shadow-blue-500/20">
+                    💧
+                </div>
+                <div>
+                    <h1 class="text-sm font-bold tracking-tight text-slate-900 leading-tight">National Water Supply & Drainage Board</h1>
+                    <p class="text-[11px] text-slate-500 font-medium tracking-wide">SMART WATER SERVICE MANAGEMENT PLATFORM</p>
+                </div>
+            </div>
+
+            <div id="auth-nav-container" class="flex items-center gap-3"></div>
+        </div>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center p-6">
+
+        <!-- ================= VIEW 0: PUBLIC LANDING HOME PAGE ================= -->
+        <section id="view-home" class="w-full max-w-6xl py-6 space-y-10">
+            <!-- Hero Section -->
+            <div class="relative bg-gradient-to-br from-blue-900 via-indigo-950 to-slate-900 rounded-3xl p-8 md:p-12 text-white shadow-2xl overflow-hidden">
+                <div class="absolute -top-24 -right-24 w-96 h-96 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none"></div>
+                <span class="drop" style="width:46px;height:46px;right:14%;top:18%;"></span>
+                <span class="drop" style="width:26px;height:26px;right:26%;top:52%;animation-delay:-2s;"></span>
+                <span class="drop" style="width:64px;height:64px;right:6%;top:58%;animation-delay:-4s;opacity:.7;"></span>
+                <svg class="hero-wave" viewBox="0 0 1200 70" preserveAspectRatio="none" aria-hidden="true"><path d="M0,35 C150,70 300,0 450,30 C600,60 750,5 900,32 C1050,58 1150,20 1240,38 L1240,70 L0,70 Z" fill="rgba(255,255,255,.12)"/><path d="M0,50 C200,20 350,70 550,48 C750,26 950,66 1240,44 L1240,70 L0,70 Z" fill="rgba(255,255,255,.2)"/></svg>
+                <div class="relative z-10 max-w-2xl space-y-5">
+                    <span class="text-xs font-extrabold uppercase tracking-widest text-cyan-300 bg-cyan-950/80 px-3 py-1 rounded-full border border-cyan-800">Government of Sri Lanka</span>
+                    <h1 class="text-3xl md:text-5xl font-black tracking-tight leading-tight">Reliable Water Services for a Thriving Nation</h1>
+                    <p class="text-sm md:text-base text-blue-200 leading-relaxed">
+                        Access your water utility statements, settle bills securely via authorized banking gateways, and track real-time household consumption from one unified digital portal.
+                    </p>
+                    <div class="flex flex-wrap gap-4 pt-2">
+                        <button onclick="goToAuth('login')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs md:text-sm px-6 py-3 rounded-2xl shadow-lg shadow-blue-600/30 transition flex items-center gap-2">
+                            <span>Access Digital Portal</span>
+                            <span>&rarr;</span>
+                        </button>
+                        <button onclick="openPartnerGateway()" class="bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold text-xs md:text-sm px-6 py-3 rounded-2xl backdrop-blur-md transition">
+                            Bank &amp; FinTech Gateway
+                        </button>
+                    </div>
+                    <div class="stat-strip">
+                        <div class="stat"><b>24/7</b><span>Support line 1939</span></div>
+                        <div class="stat"><b>3+</b><span>Partner banks</span></div>
+                        <div class="stat"><b>100%</b><span>Digital receipts</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Feature Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-3">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center text-xl font-bold">💳</div>
+                    <h3 class="font-bold text-slate-800 text-sm">Instant Online Settlement</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">Clear outstanding water bills instantly with automated bank clearance and official verifiable PDF digital receipts.</p>
+                </div>
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-3">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-xl font-bold">📊</div>
+                    <h3 class="font-bold text-slate-800 text-sm">Real-time Usage Analytics</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">Review historical meter readings and analyze monthly consumption patterns with visual trend charts.</p>
+                </div>
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-3">
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-700 flex items-center justify-center text-xl font-bold">🏛️</div>
+                    <h3 class="font-bold text-slate-800 text-sm">Open Banking Network</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">Integrated with Commercial Bank, Sampath Vishwa, and FriMi via high-security B2B API gateway standards.</p>
+                </div>
+            </div>
+
+            <!-- Bottom Support Band -->
+            <div class="bg-slate-100 rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-600 gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="text-lg">📞</span>
+                    <span>24-Hour Consumer Support &amp; Emergency Leak Reporting: <strong>1939</strong></span>
+                </div>
+                <button onclick="goToAuth('register')" class="text-blue-700 font-bold hover:underline">New Customer? Register for E-Billing &rarr;</button>
+            </div>
+        </section>
+
+        <!-- ================= VIEW 1: AUTHENTICATION SCREEN ================= -->
+        <section id="view-auth" class="hidden w-full max-w-5xl py-8 transition-all duration-300">
+            <div class="bg-white rounded-3xl shadow-2xl shadow-blue-900/10 border border-slate-150 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[550px]">
+                
+                <!-- Left Feature / Hero Banner -->
+                <div class="lg:col-span-5 bg-gradient-to-br from-blue-900 via-indigo-900 to-slate-900 p-8 text-white flex flex-col justify-between relative overflow-hidden">
+                    <div class="relative z-10 space-y-4">
+                        <div class="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-2xl shadow-inner">
+                            💧
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase tracking-widest text-cyan-300 bg-cyan-950/60 px-2.5 py-1 rounded-full border border-cyan-800/60">Official Gateway</span>
+                            <h2 class="text-2xl font-black text-white mt-2 leading-tight">National Water Supply &amp; Drainage Board</h2>
+                            <p class="text-xs text-blue-200 mt-2 leading-relaxed">
+                                Unified digital utility management system adhering to Service-Oriented Architecture (SOA) and strict Separation of Concerns.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Highlights List -->
+                    <div class="relative z-10 py-6 space-y-3">
+                        <div class="flex items-center gap-3 text-xs text-blue-100/90">
+                            <span class="w-6 h-6 rounded-lg bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-[11px] text-cyan-300 font-bold">✓</span>
+                            <span>Automated unit metering &amp; dynamic tariff engine</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-xs text-blue-100/90">
+                            <span class="w-6 h-6 rounded-lg bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-[11px] text-cyan-300 font-bold">✓</span>
+                            <span>Direct bank settlement &amp; authorized PDF receipts</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-xs text-blue-100/90">
+                            <span class="w-6 h-6 rounded-lg bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-[11px] text-cyan-300 font-bold">✓</span>
+                            <span>Role-based access control with SQL Server DR</span>
+                        </div>
+                    </div>
+
+                    <!-- Footer Info -->
+                    <div class="relative z-10 pt-4 border-t border-white/10 flex justify-between items-center text-[11px] text-blue-300">
+                        <span>Emergency Hotline: <strong>1939</strong></span>
+                        <span class="flex items-center gap-1.5 font-semibold text-emerald-400">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Service Active
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Right Form Workspace -->
+                <div class="lg:col-span-7 p-8 md:p-10 flex flex-col justify-between bg-white">
+                    <div>
+                        <!-- Tab Switcher -->
+                        <div class="flex bg-slate-100 p-1.5 rounded-2xl mb-6 text-xs font-semibold max-w-sm">
+                            <button type="button" onclick="setAuthTab('login')" id="tab-btn-login" class="flex-1 py-2 rounded-xl bg-white text-slate-900 shadow-sm transition">Sign In</button>
+                            <button type="button" onclick="setAuthTab('register')" id="tab-btn-register" class="flex-1 py-2 rounded-xl text-slate-500 hover:text-slate-900 transition">Register Account</button>
+                        </div>
+
+                        <!-- LOGIN FORM -->
+                        <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1.5">Full Name or Registered Email</label>
+                                <input type="text" id="login-user" required placeholder="e.g. Sunil Perera or sunil.perera@gmail.com" class="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-600 bg-slate-50/50 hover:bg-white focus:bg-white transition">
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-center mb-1.5">
+                                    <label class="text-xs font-semibold text-slate-700">Account Password</label>
+                                    <button type="button" onclick="openForgotPasswordModal()" class="text-xs font-semibold text-blue-700 hover:underline">Forgot password?</button>
+                                </div>
+                                <input type="password" id="login-pass" required placeholder="••••••••" class="w-full border border-slate-200 rounded-2xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-600 bg-slate-50/50 hover:bg-white focus:bg-white transition font-medium">
+                            </div>
+
+                            <button type="submit" id="btn-login" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold text-sm py-3 rounded-2xl transition shadow-lg shadow-blue-700/25 flex items-center justify-center gap-2 mt-4">
+                                <span>Access Secure Portal</span>
+                                <span>&rarr;</span>
+                            </button>
+                        </form>
+
+                        <!-- REGISTER FORM (Public customer registration only) -->
+                        <form id="form-register" onsubmit="handleRegister(event)" class="hidden space-y-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
+                                <input type="text" id="reg-user" required placeholder="e.g. Sunil Perera" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-600">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
+                                    <input type="email" id="reg-email" required placeholder="sunil@example.com" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-600">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Mobile Contact</label>
+                                    <input type="tel" id="reg-phone" required placeholder="0779998877" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-600">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+                                <input type="password" id="reg-pass" required minlength="8" placeholder="At least 8 characters" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-600">
+                            </div>
+                            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm py-2.5 rounded-xl transition shadow-lg shadow-emerald-600/25 mt-2">Create Customer Account</button>
+                        </form>
+                    </div>
+
+                    <!-- Partner Gateway Footer Link -->
+                    <div class="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between text-xs">
+                        <span class="text-slate-400">External B2B Partner?</span>
+                        <button type="button" onclick="openPartnerGateway()" class="font-bold text-blue-700 hover:text-blue-900 hover:underline flex items-center gap-1.5">
+                            <span>Commercial Bank &amp; Partner Gateway</span>
+                            <span>&rarr;</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ================= VIEW 2: CUSTOMER DASHBOARD ================= -->
+        <section id="view-customer" class="hidden w-full max-w-6xl space-y-6">
+            <div class="bg-gradient-to-r from-blue-900 to-indigo-900 rounded-3xl p-6 text-white shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <span class="text-xs font-semibold text-blue-200 uppercase tracking-widest">Customer Portal</span>
+                    <h2 class="text-2xl font-black mt-1" id="cust-welcome-title">Welcome Back</h2>
+                    <p class="text-xs text-blue-200 mt-1">Active Premise Account: <span id="cust-disp-acc" class="font-bold text-white">-</span></p>
+                </div>
+                <div class="flex items-center gap-2 bg-blue-950/60 p-1.5 rounded-2xl border border-blue-800">
+                    <label class="text-[11px] font-semibold text-blue-200 pl-2">Premise:</label>
+                    <select id="cust-account-selector" onchange="onAccountSelected()" class="border-0 bg-transparent rounded-xl px-3 py-1.5 text-xs text-white font-bold outline-none cursor-pointer">
+                        <option value="" class="text-slate-800">Loading accounts...</option>
+                    </select>
+                    <button onclick="fetchCustomerBill()" class="bg-white text-blue-900 font-bold text-xs px-3 py-1.5 rounded-xl transition hover:bg-blue-50 shadow-sm">Sync</button>
+                </div>
+            </div>
+
+            <!-- Overdue Warning Alert -->
+            <div id="cust-warning-alert" class="hidden p-4 rounded-2xl border text-xs font-semibold"></div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Current Bill Card -->
+                <div class="lg:col-span-2 bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-4">
+                    <div class="flex justify-between items-center border-b pb-3">
+                        <h3 class="text-sm font-bold text-slate-800">Current Monthly Billing Statement</h3>
+                        <span id="cust-status-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600">Pending</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <span class="text-xs text-slate-400">Bill Identifier</span>
+                            <p id="cust-b-id" class="text-sm font-bold text-slate-700">-</p>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400">Due Date</span>
+                            <p id="cust-b-due" class="text-sm font-bold text-slate-700">-</p>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400">Payable Total</span>
+                            <p id="cust-b-amt" class="text-xl font-extrabold text-blue-900">LKR 0.00</p>
+                        </div>
+                    </div>
+
+                    <div id="cust-pay-actions" class="pt-2 border-t flex justify-end">
+                        <button id="btn-cust-pay" onclick="customerPayBill()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md transition flex items-center gap-2">
+                            <span>Pay Online via Gateway</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Manage Profile Card -->
+                <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-4">
+                    <div class="flex justify-between items-center border-b pb-3">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-800">Manage Profile</h3>
+                            <p class="text-[11px] text-slate-400">KYC details, security, and alerts</p>
+                        </div>
+                        <span id="prof-user-badge" class="text-[10px] font-bold uppercase bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full">Customer</span>
+                    </div>
+
+                    <!-- Sub-tabs -->
+                    <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-semibold">
+                        <button type="button" onclick="setProfileTab('info')" id="ptab-info" class="flex-1 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm transition">Contact</button>
+                        <button type="button" onclick="setProfileTab('security')" id="ptab-sec" class="flex-1 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">Security</button>
+                        <button type="button" onclick="setProfileTab('prefs')" id="ptab-prefs" class="flex-1 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">Alerts</button>
+                    </div>
+
+                    <!-- Tab 1: Contact Details -->
+                    <div id="psec-info" class="space-y-3 text-xs">
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Full Name</label>
+                            <input type="text" id="prof-name" disabled class="w-full border rounded-xl px-3 py-2 bg-slate-50 text-slate-500 cursor-not-allowed outline-none font-semibold">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Email Address</label>
+                            <input type="email" id="prof-email" class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-blue-600">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Mobile Phone</label>
+                            <input type="tel" id="prof-phone" class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-blue-600">
+                        </div>
+                        <button onclick="saveCustomerProfile()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-2.5 rounded-xl transition shadow-sm">Save Contact Changes</button>
+                    </div>
+
+                    <!-- Tab 2: Security & Password -->
+                    <div id="psec-security" class="hidden space-y-3 text-xs">
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">Current Password</label>
+                            <input type="password" id="prof-curr-pass" placeholder="••••••••" class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-blue-600">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-600 mb-1">New Password</label>
+                            <input type="password" id="prof-new-pass" placeholder="••••••••" class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-blue-600">
+                        </div>
+                        <button onclick="changeCustomerPassword()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-2.5 rounded-xl transition shadow-sm">Update Password</button>
+                    </div>
+
+                    <!-- Tab 3: Notification Preferences -->
+                    <div id="psec-prefs" class="hidden space-y-3 text-xs">
+                        <label class="flex items-center gap-2 p-2 border rounded-xl bg-slate-50 cursor-pointer">
+                            <input type="checkbox" id="pref-ebill" checked class="rounded text-blue-600">
+                            <span class="text-slate-700 font-medium">Enable Paperless E-Bill via Email</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-2 border rounded-xl bg-slate-50 cursor-pointer">
+                            <input type="checkbox" id="pref-sms" checked class="rounded text-blue-600">
+                            <span class="text-slate-700 font-medium">SMS Notifications on meter reading</span>
+                        </label>
+                        <button onclick="showToast('Alert preferences saved successfully', 'success')" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded-xl transition">Save Alert Preferences</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visual Consumption Chart & Table -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Consumption Chart -->
+                <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-bold text-slate-800">Monthly Usage Trends (Units)</h3>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">Visual Analytics</span>
+                    </div>
+                    <div class="h-48 relative">
+                        <canvas id="usageChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Consumption History Table -->
+                <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-3">
+                    <h3 class="text-sm font-bold text-slate-800">Consumption &amp; Reading History</h3>
+                    <div class="overflow-x-auto max-h-48">
+                        <table class="w-full text-xs text-left">
+                            <thead class="text-slate-400 border-b">
+                                <tr><th class="py-2">Date Recorded</th><th>Units Consumed</th></tr>
+                            </thead>
+                            <tbody id="cust-usage-rows" class="divide-y text-slate-600">
+                                <tr><td colspan="2" class="py-3 text-slate-400">Loading usage history...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAYMENT HISTORY & DIGITAL RECEIPTS -->
+            <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-4">
+                <div class="flex justify-between items-center border-b pb-3">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800">Payment History &amp; Digital Receipts</h3>
+                        <p class="text-xs text-slate-400">Inspect historical payments, verify transaction authorizations, and download PDF receipts.</p>
+                    </div>
+                    <button onclick="fetchPaymentHistory()" class="text-blue-700 text-xs font-semibold hover:underline">Refresh History</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-left">
+                        <thead class="text-slate-400 border-b">
+                            <tr>
+                                <th class="py-2.5">Date Paid</th>
+                                <th>Receipt Number</th>
+                                <th>Method</th>
+                                <th>Amount Paid</th>
+                                <th>Status</th>
+                                <th class="text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cust-payments-rows" class="divide-y text-slate-700">
+                            <tr><td colspan="6" class="py-3 text-slate-400">Loading payment history...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Feedback Submission -->
+            <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-3">
+                <h3 class="text-sm font-bold text-slate-800">Submit Customer Feedback</h3>
+                <textarea id="cust-feedback-txt" rows="2" placeholder="Report water pressure issues, leaks, or billing queries..." class="w-full border rounded-xl p-3 text-xs outline-none focus:ring-1 focus:ring-blue-600"></textarea>
+                <div class="flex justify-end">
+                    <button onclick="sendFeedback()" class="bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-md shadow-blue-700/20">Submit Feedback</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= VIEW 3: STAFF CONSOLE ================= -->
+        <section id="view-staff" class="hidden w-full max-w-6xl space-y-6">
+            <div class="bg-slate-900 rounded-3xl p-6 text-white shadow-xl flex justify-between items-center">
+                <div>
+                    <span class="text-xs font-semibold text-blue-400 uppercase tracking-widest">Internal Operations</span>
+                    <h2 class="text-2xl font-black mt-1">Staff Field &amp; Billing Console</h2>
+                </div>
+                <div class="text-right text-xs text-slate-400">
+                    <p>Officer: <span id="staff-name-disp" class="font-bold text-white">Field Staff</span></p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Record Meter Reading -->
+                <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-3">
+                    <h3 class="text-sm font-bold text-slate-800">Record Field Meter Reading</h3>
+                    <form onsubmit="handleStaffReading(event)" class="space-y-3 text-xs">
+                        <div>
+                            <label class="font-semibold text-slate-600">Account Number</label>
+                            <input type="text" id="stf-read-acc" required value="NC-100245" class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-1 focus:ring-blue-600">
+                        </div>
+                        <div>
+                            <label class="font-semibold text-slate-600">Meter Value (Units)</label>
+                            <input type="number" step="0.1" id="stf-read-val" required placeholder="e.g. 65.5" class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-1 focus:ring-blue-600">
+                        </div>
+                        <button type="submit" id="btn-stf-reading" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-2.5 rounded-xl transition shadow-md shadow-blue-700/20">Submit &amp; Calculate Bill</button>
+                    </form>
+                    <div id="stf-read-result" class="hidden p-3 rounded-xl text-xs"></div>
+                </div>
+
+                <!-- Manage Connections -->
+                <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-3">
+                    <h3 class="text-sm font-bold text-slate-800">Register Water Connection</h3>
+                    <form onsubmit="handleStaffConnection(event)" class="space-y-2 text-xs">
+                        <input type="text" id="stf-c-acc" required placeholder="Account (NC-100999)" class="w-full border rounded-xl px-3 py-2 outline-none">
+                        <input type="text" id="stf-c-addr" required placeholder="Installation Address" class="w-full border rounded-xl px-3 py-2 outline-none">
+                        <input type="number" id="stf-c-uid" required placeholder="Customer User ID" class="w-full border rounded-xl px-3 py-2 outline-none">
+                        <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded-xl transition">Provision Connection</button>
+                    </form>
+                </div>
+
+                <!-- Feedbacks Review -->
+                <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-bold text-slate-800">Customer Feedback Inbox</h3>
+                        <button onclick="loadStaffFeedbacks()" class="text-blue-700 text-xs font-semibold hover:underline">Refresh</button>
+                    </div>
+                    <div id="stf-feedback-box" class="space-y-2 max-h-52 overflow-y-auto text-xs">
+                        <p class="text-slate-400">Loading feedbacks...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Directory & Transactions -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-3">
+                    <h3 class="text-sm font-bold text-slate-800">Consumer Directory</h3>
+                    <div class="overflow-x-auto max-h-48">
+                        <table class="w-full text-xs text-left">
+                            <thead class="text-slate-400 border-b">
+                                <tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th></tr>
+                            </thead>
+                            <tbody id="stf-cust-rows" class="divide-y text-slate-600"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-3">
+                    <h3 class="text-sm font-bold text-slate-800">Payment Transactions</h3>
+                    <div class="overflow-x-auto max-h-48">
+                        <table class="w-full text-xs text-left">
+                            <thead class="text-slate-400 border-b">
+                                <tr><th>Acc</th><th>Amount</th><th>Method</th><th>Status</th></tr>
+                            </thead>
+                            <tbody id="stf-pay-rows" class="divide-y text-slate-600"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= VIEW 4: ADMINISTRATION BACK-OFFICE ================= -->
+        <section id="view-admin" class="hidden w-full max-w-6xl space-y-6">
+            <div class="bg-blue-950 rounded-3xl p-6 text-white shadow-xl flex justify-between items-center">
+                <div>
+                    <span class="text-xs font-semibold text-amber-400 uppercase tracking-widest">Master Authority</span>
+                    <h2 class="text-2xl font-black mt-1">Administration &amp; Executive Analytics</h2>
+                </div>
+                <div class="text-right text-xs text-slate-400">
+                    <p>Security clearance: <span class="font-bold text-amber-300">System Administrator</span></p>
+                </div>
+            </div>
+
+            <!-- Live Metrics -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
+                    <span class="text-xs text-slate-400">Total Users</span>
+                    <p id="adm-metric-users" class="text-2xl font-black text-slate-900 mt-1">-</p>
+                </div>
+                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
+                    <span class="text-xs text-slate-400">Water Connections</span>
+                    <p id="adm-metric-conn" class="text-2xl font-black text-slate-900 mt-1">-</p>
+                </div>
+                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
+                    <span class="text-xs text-slate-400">Total Billed</span>
+                    <p id="adm-metric-billed" class="text-2xl font-black text-blue-900 mt-1">-</p>
+                </div>
+                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
+                    <span class="text-xs text-slate-400">Collected Revenue</span>
+                    <p id="adm-metric-col" class="text-2xl font-black text-emerald-600 mt-1">-</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Role Assignment -->
+                <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-3">
+                    <h3 class="text-sm font-bold text-slate-800">Assign System Roles</h3>
+                    <input type="number" id="adm-role-uid" placeholder="User ID" class="w-full border rounded-xl px-3 py-2 text-xs outline-none">
+                    <select id="adm-role-val" class="w-full border rounded-xl px-3 py-2 text-xs outline-none bg-white">
+                        <option value="Customer">Customer</option>
+                        <option value="Staff">Staff</option>
+                        <option value="Admin">Administrator</option>
+                    </select>
+                    <button onclick="handleAdminRoleAssign()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs py-2.5 rounded-xl transition">Update User Permission</button>
+                </div>
+
+                <!-- Database Recovery -->
+                <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-3">
+                    <h3 class="text-sm font-bold text-slate-800">Disaster Recovery (SQL Server)</h3>
+                    <div class="space-y-2 pt-1">
+                        <button onclick="handleAdminBackup()" class="w-full bg-slate-900 hover:bg-black text-white text-xs font-bold py-2.5 rounded-xl transition">Create Database Snapshot</button>
+                        <button onclick="handleAdminRestore()" class="w-full border border-red-500 text-red-600 hover:bg-red-50 text-xs font-bold py-2 rounded-xl transition">Restore Latest Snapshot</button>
+                    </div>
+                </div>
+
+                <!-- Tariffs -->
+                <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-3">
+                    <h3 class="text-sm font-bold text-slate-800">System Tariff Parameters</h3>
+                    <div id="adm-tariff-display" class="text-xs space-y-1 text-slate-600 bg-slate-50 p-3 rounded-2xl">
+                        Loading system tariff policies...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Logs -->
+            <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-slate-800">System Audit Trail</h3>
+                    <button onclick="loadAdminLogs()" class="text-blue-700 text-xs font-semibold hover:underline">Refresh Logs</button>
+                </div>
+                <div class="overflow-x-auto max-h-48">
+                    <table class="w-full text-xs text-left">
+                        <thead class="text-slate-400 border-b">
+                            <tr><th>Timestamp</th><th>Initiated By</th><th>Security Action</th></tr>
+                        </thead>
+                        <tbody id="adm-logs-rows" class="divide-y text-slate-600"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= VIEW 5: REAL-WORLD PARTNER BANKING GATEWAY ================= -->
+        <section id="view-partner" class="hidden w-full max-w-xl space-y-6">
+            <div class="bg-white rounded-3xl p-8 border border-slate-100 shadow-xl space-y-6">
+                <!-- Header -->
+                <div class="flex justify-between items-start border-b pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xl">
+                            🏛️
+                        </div>
+                        <div>
+                            <h2 class="text-base font-bold text-slate-900">Commercial Bank &amp; FinTech Gateway</h2>
+                            <p class="text-xs text-slate-400">Authorized External Utility Settlement Portal</p>
+                        </div>
+                    </div>
+                    <button onclick="showLandingHome()" class="text-xs font-semibold text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition">&larr; Back to Home</button>
+                </div>
+
+                <!-- Channel Selection & Account Inquiry -->
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Authorized Banking Partner</label>
+                            <select id="partner-channel-select" onchange="updatePartnerKey()" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-xs outline-none bg-slate-50 font-medium">
+                                <option value="NWSDB-PARTNER-KEY-2026">Commercial Bank Digital IPG</option>
+                                <option value="NWSDB-PARTNER-KEY-2026">Sampath Bank Vishwa</option>
+                                <option value="NWSDB-PARTNER-KEY-2026">FriMi / Nations Trust</option>
+                                <option value="WRONG-PARTNER-KEY">Invalid / Unauthorized Channel</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Gateway Security Token</label>
+                            <input type="text" id="partner-apikey" value="NWSDB-PARTNER-KEY-2026" readonly class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-xs bg-slate-100 text-slate-500 font-mono outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Customer Water Account Number</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="partner-bill-acc" value="NC-100882" placeholder="e.g. NC-100245" class="flex-1 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:ring-2 focus:ring-blue-600">
+                            <button onclick="handlePartnerQuery()" class="bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition shadow-md shadow-blue-700/20">Fetch Bill</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Feedback Notice -->
+                <div id="partner-feedback-msg" class="hidden p-3.5 rounded-2xl text-xs font-medium"></div>
+
+                <!-- Found Bill Card -->
+                <div id="partner-bill-box" class="hidden rounded-2xl border border-blue-100 bg-blue-50/50 p-5 space-y-4">
+                    <div class="flex justify-between items-center border-b border-blue-100 pb-3">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Pending Water Invoice</span>
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800">Unpaid</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <span class="text-[11px] text-slate-400">Account Verified</span>
+                            <p id="pt-acc" class="font-bold text-slate-800 text-sm mt-0.5">-</p>
+                        </div>
+                        <div>
+                            <span class="text-[11px] text-slate-400">Total Payable Outstanding</span>
+                            <p id="pt-amt" class="font-black text-blue-900 text-lg mt-0.5">LKR 0.00</p>
+                        </div>
+                    </div>
+                    <button onclick="handlePartnerPay()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-3 rounded-xl transition shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2">
+                        <span>💳</span> Authorize &amp; Pay from Bank Account
+                    </button>
+                </div>
+
+                <!-- Settlement Success Card -->
+                <div id="partner-success-box" class="hidden rounded-2xl border border-emerald-200 bg-emerald-50 p-5 space-y-3 text-slate-800">
+                    <div class="flex items-center gap-2 text-emerald-800 font-bold text-xs">
+                        <span>✅</span> Transaction Completed Successfully
+                    </div>
+                    <div class="text-xs space-y-1 text-slate-600 pt-1 border-t border-emerald-100">
+                        <p>Official NWSDB Receipt: <strong id="pt-rec-no" class="font-mono text-emerald-950"></strong></p>
+                        <p>Total Cleared: <strong id="pt-rec-amt" class="text-emerald-950"></strong></p>
+                        <p class="text-[10px] text-slate-400 mt-2">Electronic clearance sent to NWSDB Core Service. Account balance is updated immediately.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ================= MODAL: FORGOT PASSWORD ================= -->
+    <div id="forgot-modal" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-200 p-7 space-y-5">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">Reset Account Password</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Enter your registered email address to receive a secure recovery code.</p>
+                </div>
+                <button onclick="closeForgotPasswordModal()" class="text-slate-400 hover:text-slate-700 text-lg font-bold">&times;</button>
+            </div>
+            
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Registered Email Address</label>
+                    <input type="email" id="forgot-email-input" placeholder="e.g. sunil.perera@gmail.com" class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-blue-600">
+                </div>
+                <div id="forgot-feedback-box" class="hidden p-3 rounded-xl font-medium"></div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2 border-t">
+                <button onclick="closeForgotPasswordModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-800">Cancel</button>
+                <button onclick="handleSendPasswordReset()" id="btn-forgot-submit" class="bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md transition">Send Reset Link</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: DIGITAL PAYMENT RECEIPT ================= -->
+    <div id="receipt-modal" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200">
+            <div id="receipt-printable-area" class="p-8 space-y-6">
+                <div class="flex justify-between items-start border-b border-dashed border-slate-300 pb-5">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl">💧</span>
+                            <span class="font-extrabold text-blue-900 text-sm tracking-tight">NWSDB SRI LANKA</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 font-medium">National Water Supply &amp; Drainage Board</p>
+                        <p class="text-[10px] text-slate-400">Head Office, Galle Road, Ratmalana</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-1 rounded-md bg-emerald-100 text-emerald-800">OFFICIAL RECEIPT</span>
+                        <p id="modal-r-no" class="font-black text-xs text-slate-800 mt-2">REC-00000000</p>
+                    </div>
+                </div>
+
+                <div class="space-y-3 text-xs">
+                    <div class="flex justify-between py-1 border-b border-slate-100">
+                        <span class="text-slate-500">Water Account Number:</span>
+                        <span id="modal-r-acc" class="font-bold text-slate-900">NC-000000</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-slate-100">
+                        <span class="text-slate-500">Settled Bill Number:</span>
+                        <span id="modal-r-bill" class="font-semibold text-slate-800">-</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-slate-100">
+                        <span class="text-slate-500">Transaction Timestamp:</span>
+                        <span id="modal-r-date" class="font-semibold text-slate-800">-</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-slate-100">
+                        <span class="text-slate-500">Payment Gateway Channel:</span>
+                        <span id="modal-r-method" class="font-semibold text-slate-800">Online IPG</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-slate-100">
+                        <span class="text-slate-500">Authorization Status:</span>
+                        <span class="font-bold text-emerald-700">COMPLETED &amp; VERIFIED</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex justify-between items-center">
+                    <div>
+                        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Total Amount Settled</span>
+                        <p class="text-[10px] text-slate-500">All statutory taxes &amp; charges inclusive</p>
+                    </div>
+                    <p id="modal-r-amt" class="text-2xl font-black text-blue-900">LKR 0.00</p>
+                </div>
+
+                <div class="text-center text-[10px] text-slate-400 space-y-0.5 border-t border-dashed border-slate-200 pt-4">
+                    <p>This is a computer-generated transaction record issued under the SOA Smart Water Framework.</p>
+                    <p>For billing queries contact NWSDB 24-Hour Hotline: <strong>1939</strong></p>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 px-6 py-4 border-t border-slate-200 flex justify-between items-center no-print">
+                <button onclick="closeReceiptModal()" class="text-xs font-semibold text-slate-500 hover:text-slate-800">Close Window</button>
+                <button onclick="window.print()" class="bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md transition flex items-center gap-2">
+                    <span>🖨️</span> Download / Print as PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 text-center py-4 text-xs text-slate-400 no-print">
+        National Water Supply &amp; Drainage Board &bull; Service Oriented Architecture Final Implementation
+    </footer>
+
+    <script>
+        const API_BASE = 'http://localhost:5261';
+
+        let session = JSON.parse(localStorage.getItem('nwsdb_session') || 'null');
+        let currentCustBill = null;
+        let activePartnerBill = null;
+        let cachedPayments = [];
+        let usageChartInstance = null;
+
+        window.onload = function() {
+            renderSessionState();
+        };
+
+        async function authFetch(endpoint, options = {}) {
+            const token = session?.token;
+            const headers = {
+                'Content-Type': 'application/json',
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+                ...options.headers
+            };
+
+            const response = await fetch(`${API_BASE}${endpoint}`, {
+                ...options,
+                headers
+            });
+
+            if (response.status === 401 && !endpoint.includes('/api/Auth/login') && !endpoint.includes('/api/Partner/')) {
+                showToast('Session expired or unauthorized. Please sign in.', 'error');
+                handleLogout();
+                throw new Error('Unauthorized access');
+            }
+
+            return response;
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            const msg = document.getElementById('toast-msg');
+
+            icon.innerText = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+            msg.innerText = message;
+
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 3500);
+        }
+
+        function showLandingHome() {
+            const views = ['home', 'auth', 'customer', 'staff', 'admin', 'partner'];
+            views.forEach(v => document.getElementById(`view-${v}`).classList.add('hidden'));
+
+            if (session) {
+                renderSessionState();
+            } else {
+                document.getElementById('view-home').classList.remove('hidden');
+                document.getElementById('auth-nav-container').innerHTML = `
+                    <button onclick="goToAuth('login')" class="bg-blue-700 hover:bg-blue-800 text-white font-semibold text-xs px-4 py-2 rounded-xl transition shadow-sm">Sign In</button>
+                    <button onclick="goToAuth('register')" class="border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold text-xs px-4 py-2 rounded-xl transition">Register</button>
+                `;
+            }
+        }
+
+        function goToAuth(tab = 'login') {
+            const views = ['home', 'auth', 'customer', 'staff', 'admin', 'partner'];
+            views.forEach(v => document.getElementById(`view-${v}`).classList.add('hidden'));
+            document.getElementById('view-auth').classList.remove('hidden');
+            setAuthTab(tab);
+        }
+
+        function setAuthTab(tab) {
+            const isLogin = tab === 'login';
+            document.getElementById('form-login').classList.toggle('hidden', !isLogin);
+            document.getElementById('form-register').classList.toggle('hidden', isLogin);
+            document.getElementById('tab-btn-login').className = isLogin ? 'flex-1 py-2 rounded-xl bg-white text-slate-900 shadow-sm transition' : 'flex-1 py-2 rounded-xl text-slate-500 hover:text-slate-900 transition';
+            document.getElementById('tab-btn-register').className = !isLogin ? 'flex-1 py-2 rounded-xl bg-white text-slate-900 shadow-sm transition' : 'flex-1 py-2 rounded-xl text-slate-500 hover:text-slate-900 transition';
+        }
+
+        function setProfileTab(tab) {
+            ['info', 'security', 'prefs'].forEach(t => {
+                document.getElementById(`psec-${t}`).classList.toggle('hidden', t !== tab);
+                document.getElementById(`ptab-${t}`).className = t === tab 
+                    ? 'flex-1 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm transition' 
+                    : 'flex-1 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition';
+            });
+        }
+
+        function openForgotPasswordModal() {
+            document.getElementById('forgot-email-input').value = '';
+            document.getElementById('forgot-feedback-box').classList.add('hidden');
+            document.getElementById('forgot-modal').classList.remove('hidden');
+        }
+
+        function closeForgotPasswordModal() {
+            document.getElementById('forgot-modal').classList.add('hidden');
+        }
+
+        function handleSendPasswordReset() {
+            const email = document.getElementById('forgot-email-input').value.trim();
+            const fb = document.getElementById('forgot-feedback-box');
+            
+            if (!email || !email.includes('@')) {
+                fb.className = "p-3 rounded-xl text-xs bg-rose-50 text-rose-800 border border-rose-200 block";
+                fb.innerText = "Please enter a valid registered email address.";
+                return;
+            }
+
+            const btn = document.getElementById('btn-forgot-submit');
+            btn.disabled = true;
+            btn.innerText = "Sending Code...";
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerText = "Send Reset Link";
+                fb.className = "p-3 rounded-xl text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 block";
+                fb.innerHTML = `Password reset token has been dispatched to <strong>${email}</strong>. Please follow instructions sent to your inbox.`;
+                showToast("Password reset link sent.", "success");
+            }, 800);
+        }
+
+        function renderSessionState() {
+            const nav = document.getElementById('auth-nav-container');
+            const views = ['home', 'auth', 'customer', 'staff', 'admin', 'partner'];
+            views.forEach(v => document.getElementById(`view-${v}`).classList.add('hidden'));
+
+            if (!session) {
+                showLandingHome();
+                return;
+            }
+
+            nav.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="text-right">
+                        <p class="text-xs font-bold text-slate-800 leading-tight">${session.username}</p>
+                        <span class="text-[10px] font-semibold text-blue-700 uppercase bg-blue-50 px-2 py-0.5 rounded-full">${session.role}</span>
+                    </div>
+                    <button onclick="handleLogout()" class="text-xs font-semibold text-rose-600 hover:text-rose-800 bg-rose-50 px-3 py-1.5 rounded-xl transition">Sign Out</button>
+                </div>
+            `;
+
+            if (session.role === 'Customer') {
+                document.getElementById('view-customer').classList.remove('hidden');
+                document.getElementById('cust-welcome-title').innerText = `Welcome, ${session.username}`;
+                loadCustomerPremises();
+                loadCustomerProfile();
+            } else if (session.role === 'Staff') {
+                document.getElementById('view-staff').classList.remove('hidden');
+                document.getElementById('staff-name-disp').innerText = session.username;
+                loadStaffData();
+            } else if (session.role === 'Admin') {
+                document.getElementById('view-admin').classList.remove('hidden');
+                loadAdminDashboard();
+            }
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('login-user').value.trim();
+            const password = document.getElementById('login-pass').value;
+            const btn = document.getElementById('btn-login');
+
+            btn.disabled = true;
+            btn.innerHTML = `<span>Signing in...</span>`;
+
+            try {
+                const res = await fetch(`${API_BASE}/api/Auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (res.ok) {
+                    session = await res.json();
+                    localStorage.setItem('nwsdb_session', JSON.stringify(session));
+                    showToast(`Signed in as ${session.username}`, 'success');
+                    renderSessionState();
+                } else {
+                    const err = await res.json();
+                    showToast(err.message || 'Invalid username or password.', 'error');
+                }
+            } catch (err) { 
+                showToast('Failed connecting to API service. Is the backend running?', 'error'); 
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<span>Access Secure Portal &rarr;</span>`;
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const payload = {
+                username: document.getElementById('reg-user').value.trim(),
+                email: document.getElementById('reg-email').value.trim(),
+                phone: document.getElementById('reg-phone').value.trim(),
+                password: document.getElementById('reg-pass').value
+            };
+
+            try {
+                const res = await fetch(`${API_BASE}/api/Auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    showToast('Customer account registered successfully. Please sign in.', 'success');
+                    setAuthTab('login');
+                } else {
+                    const err = await res.json();
+                    const firstValidationError = err.errors ? Object.values(err.errors).flat()[0] : null;
+                    showToast(err.message || firstValidationError || 'Registration failed.', 'error');
+                }
+            } catch (err) {
+                showToast('Server connection failed.', 'error');
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('nwsdb_session');
+            session = null;
+            showToast('Signed out of system.', 'info');
+            renderSessionState();
+        }
+
+        function openPartnerGateway() {
+            const views = ['home', 'auth', 'customer', 'staff', 'admin', 'partner'];
+            views.forEach(v => document.getElementById(`view-${v}`).classList.add('hidden'));
+            document.getElementById('view-partner').classList.remove('hidden');
+        }
+
+        async function loadCustomerPremises() {
+            if (!session || !session.id) return;
+            const selector = document.getElementById('cust-account-selector');
+            try {
+                const res = await authFetch(`/api/Customer/user/${session.id}/connections`);
+                if (res.ok) {
+                    const connections = await res.json();
+                    if (connections && connections.length > 0) {
+                        selector.innerHTML = connections.map(c => `
+                            <option value="${c.accountNumber}" class="text-slate-800">
+                                ${c.accountNumber} (${c.connectionAddress})
+                            </option>
+                        `).join('');
+                    } else {
+                        selector.innerHTML = `<option value="NC-100245" class="text-slate-800">NC-100245 (Default)</option>`;
+                    }
+                } else {
+                    selector.innerHTML = `<option value="NC-100245" class="text-slate-800">NC-100245 (Default)</option>`;
+                }
+            } catch(e) {
+                selector.innerHTML = `<option value="NC-100245" class="text-slate-800">NC-100245 (Default)</option>`;
+            }
+            onAccountSelected();
+        }
+
+        function onAccountSelected() {
+            const acc = document.getElementById('cust-account-selector').value;
+            document.getElementById('cust-disp-acc').innerText = acc;
+            fetchCustomerBill();
+        }
+
+        async function loadCustomerProfile() {
+            if (!session || !session.id) return;
+            try {
+                const res = await authFetch(`/api/Customer/profile/${session.id}`);
+                if (res.ok) {
+                    const user = await res.json();
+                    document.getElementById('prof-name').value = user.username;
+                    document.getElementById('prof-email').value = user.email;
+                    document.getElementById('prof-phone').value = user.phone;
+                    document.getElementById('prof-user-badge').innerText = `ID #${user.id} • ${user.role}`;
+                }
+            } catch(err) { }
+        }
+
+        async function saveCustomerProfile() {
+            const email = document.getElementById('prof-email').value.trim();
+            const phone = document.getElementById('prof-phone').value.trim();
+
+            try {
+                const res = await authFetch(`/api/Customer/profile/${session.id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ email, phone })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    showToast(data.message || 'Profile saved.', 'success');
+                    session.email = email;
+                    session.phone = phone;
+                    localStorage.setItem('nwsdb_session', JSON.stringify(session));
+                } else {
+                    showToast(data.message || 'Update failed.', 'error');
+                }
+            } catch(e) {
+                showToast('Could not save profile.', 'error');
+            }
+        }
+
+        async function changeCustomerPassword() {
+            const currentPassword = document.getElementById('prof-curr-pass').value;
+            const newPassword = document.getElementById('prof-new-pass').value;
+            const email = document.getElementById('prof-email').value.trim();
+            const phone = document.getElementById('prof-phone').value.trim();
+
+            if (!currentPassword || !newPassword) {
+                return showToast('Please provide both current and new password.', 'error');
+            }
+
+            try {
+                const res = await authFetch(`/api/Customer/profile/${session.id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ email, phone, currentPassword, newPassword })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('Password changed successfully!', 'success');
+                    document.getElementById('prof-curr-pass').value = '';
+                    document.getElementById('prof-new-pass').value = '';
+                } else {
+                    showToast(data.message || 'Password update failed.', 'error');
+                }
+            } catch(e) {
+                showToast('Password update error.', 'error');
+            }
+        }
+
+        async function fetchCustomerBill() {
+            const acc = document.getElementById('cust-disp-acc').innerText.trim() || 'NC-100245';
+
+            try {
+                const res = await authFetch(`/api/Customer/bill/${encodeURIComponent(acc)}`);
+                if (res.ok) {
+                    const bill = await res.json();
+                    currentCustBill = bill;
+                    document.getElementById('cust-b-id').innerText = bill.id;
+                    document.getElementById('cust-b-due').innerText = new Date(bill.dueDate).toLocaleDateString();
+                    document.getElementById('cust-b-amt').innerText = `LKR ${(bill.outstandingBalance ?? bill.amount).toFixed(2)}`;
+
+                    const isPaid = bill.status.toLowerCase() === 'paid' || (bill.outstandingBalance !== undefined && bill.outstandingBalance <= 0);
+                    const badge = document.getElementById('cust-status-badge');
+                    badge.innerText = bill.status;
+                    badge.className = isPaid ? 'px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800' : 'px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800';
+                    document.getElementById('cust-pay-actions').classList.toggle('hidden', isPaid);
+
+                    const warn = document.getElementById('cust-warning-alert');
+                    if (bill.isDisconnectionWarning) {
+                        warn.className = 'p-4 rounded-2xl border text-xs font-semibold bg-rose-50 text-rose-800 border-rose-300';
+                        warn.innerText = bill.warningMessage;
+                        warn.classList.remove('hidden');
+                    } else if (bill.isOverdue) {
+                        warn.className = 'p-4 rounded-2xl border text-xs font-semibold bg-amber-50 text-amber-800 border-amber-300';
+                        warn.innerText = bill.warningMessage;
+                        warn.classList.remove('hidden');
+                    } else {
+                        warn.classList.add('hidden');
+                    }
+                } else {
+                    document.getElementById('cust-b-id').innerText = '-';
+                    document.getElementById('cust-b-due').innerText = '-';
+                    document.getElementById('cust-b-amt').innerText = 'LKR 0.00';
+                    document.getElementById('cust-status-badge').innerText = 'No Bills';
+                    document.getElementById('cust-pay-actions').classList.add('hidden');
+                }
+
+                const uRes = await authFetch(`/api/Customer/usage/${encodeURIComponent(acc)}`);
+                if (uRes.ok) {
+                    const data = await uRes.json();
+                    const tbody = document.getElementById('cust-usage-rows');
+                    tbody.innerHTML = data.length ? data.map(r => `
+                        <tr>
+                            <td class="py-2">${new Date(r.readingDate).toLocaleDateString()}</td>
+                            <td class="font-semibold text-slate-800">${r.readingValue} Units</td>
+                        </tr>
+                    `).join('') : `<tr><td colspan="2" class="py-2 text-slate-400">No prior meter readings found.</td></tr>`;
+
+                    renderUsageChart(data);
+                }
+
+                fetchPaymentHistory();
+            } catch(e) { }
+        }
+
+        function renderUsageChart(usageData) {
+            const ctx = document.getElementById('usageChart').getContext('2d');
+            const sortedData = [...usageData].reverse();
+            const labels = sortedData.length ? sortedData.map(d => new Date(d.readingDate).toLocaleDateString([], { month: 'short', day: 'numeric' })) : ['Initial'];
+            const values = sortedData.length ? sortedData.map(d => d.readingValue) : [0];
+
+            if (usageChartInstance) {
+                usageChartInstance.destroy();
+            }
+
+            usageChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Water Consumption (Units)',
+                        data: values,
+                        backgroundColor: 'rgba(37, 99, 235, 0.7)',
+                        borderColor: 'rgb(37, 99, 235)',
+                        borderWidth: 1.5,
+                        borderRadius: 8,
+                        maxBarThickness: 40
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 } } },
+                        x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        async function fetchPaymentHistory() {
+            const acc = document.getElementById('cust-disp-acc').innerText.trim() || 'NC-100245';
+            try {
+                const res = await authFetch(`/api/Customer/payment-history/${encodeURIComponent(acc)}`);
+                if (res.ok) {
+                    cachedPayments = await res.json();
+                    const tbody = document.getElementById('cust-payments-rows');
+                    tbody.innerHTML = cachedPayments.length ? cachedPayments.map((p, idx) => `
+                        <tr>
+                            <td class="py-2.5 text-slate-500">${new Date(p.paymentDate).toLocaleDateString()}</td>
+                            <td class="font-mono font-bold text-slate-800">${p.receiptNumber}</td>
+                            <td>${p.paymentMethod}</td>
+                            <td class="font-bold text-slate-900">LKR ${p.amount.toFixed(2)}</td>
+                            <td><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">${p.paymentStatus}</span></td>
+                            <td class="text-right">
+                                <button onclick="openReceiptModalByIndex(${idx})" class="text-xs font-semibold text-blue-700 hover:text-blue-900 hover:underline">View / Print Receipt</button>
+                            </td>
+                        </tr>
+                    `).join('') : `<tr><td colspan="6" class="py-3 text-slate-400">No prior payment receipts available for this account.</td></tr>`;
+                }
+            } catch (e) { }
+        }
+
+        async function customerPayBill() {
+            if (!currentCustBill) return;
+            const btn = document.getElementById('btn-cust-pay');
+            btn.disabled = true;
+            btn.innerText = "Authorizing...";
+
+            const amountToPay = currentCustBill.outstandingBalance ?? currentCustBill.amount;
+
+            try {
+                const res = await authFetch('/api/Payment/pay', {
+                    method: 'POST',
+                    body: JSON.stringify({ billId: currentCustBill.id, amount: amountToPay, paymentMethod: 'Online' })
+                });
+
+                if (res.ok) {
+                    const rec = await res.json();
+                    showToast('Payment settled and receipt generated!', 'success');
+                    fetchCustomerBill();
+                    showReceiptModal(rec.receiptNumber, currentCustBill.accountNumber, currentCustBill.id, new Date(rec.receiptDate).toLocaleString(), rec.paymentMethod, rec.amountPaid);
+                } else { 
+                    const err = await res.json();
+                    showToast(err.message || 'Payment rejected by gateway engine.', 'error'); 
+                }
+            } catch(e) {
+                showToast('Payment network request failed.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Pay Online via Gateway";
+            }
+        }
+
+        function openReceiptModalByIndex(idx) {
+            const p = cachedPayments[idx];
+            if (!p) return;
+            const acc = document.getElementById('cust-disp-acc').innerText.trim();
+            showReceiptModal(p.receiptNumber, acc, p.billId || p.id, new Date(p.paymentDate).toLocaleString(), p.paymentMethod, p.amount);
+        }
+
+        function showReceiptModal(receiptNo, accNo, billId, dateStr, method, amount) {
+            document.getElementById('modal-r-no').innerText = receiptNo;
+            document.getElementById('modal-r-acc').innerText = accNo;
+            document.getElementById('modal-r-bill').innerText = `#BILL-00${billId}`;
+            document.getElementById('modal-r-date').innerText = dateStr;
+            document.getElementById('modal-r-method').innerText = method;
+            document.getElementById('modal-r-amt').innerText = `LKR ${parseFloat(amount).toFixed(2)}`;
+            document.getElementById('receipt-modal').classList.remove('hidden');
+        }
+
+        function closeReceiptModal() {
+            document.getElementById('receipt-modal').classList.add('hidden');
+        }
+
+        async function sendFeedback() {
+            const acc = document.getElementById('cust-disp-acc').innerText;
+            const msg = document.getElementById('cust-feedback-txt').value.trim();
+            if (!msg) return showToast('Please enter your feedback text.', 'error');
+
+            try {
+                const res = await authFetch('/api/Customer/feedback', {
+                    method: 'POST',
+                    body: JSON.stringify({ accountNumber: acc, message: msg })
+                });
+                if (res.ok) {
+                    showToast('Feedback submitted to NWSDB support staff.', 'success');
+                    document.getElementById('cust-feedback-txt').value = '';
+                } else {
+                    showToast('Failed to submit feedback.', 'error');
+                }
+            } catch(e) {
+                showToast('Submission error.', 'error');
+            }
+        }
+
+        async function loadStaffData() {
+            loadStaffCustomers();
+            loadStaffPayments();
+            loadStaffFeedbacks();
+        }
+
+        async function handleStaffReading(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-stf-reading');
+            const alertBox = document.getElementById('stf-read-result');
+            btn.disabled = true;
+            btn.innerText = "Calculating Bill...";
+
+            const data = {
+                accountNumber: document.getElementById('stf-read-acc').value.trim(),
+                readingValue: parseFloat(document.getElementById('stf-read-val').value),
+                recordedByStaffId: session.id
+            };
+            
+            try {
+                const res = await authFetch('/api/Billing/meter-reading', {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+                const out = await res.json();
+                alertBox.classList.remove('hidden');
+                if (res.ok) {
+                    alertBox.className = "p-3 rounded-xl text-xs bg-emerald-50 text-emerald-800 border border-emerald-200";
+                    alertBox.innerText = `Recorded. New Bill Created: LKR ${out.calculatedBillAmount.toFixed(2)}`;
+                    showToast('Reading logged & tariff calculated.', 'success');
+                } else {
+                    alertBox.className = "p-3 rounded-xl text-xs bg-rose-50 text-rose-800 border border-rose-200";
+                    alertBox.innerText = out.message || "Error.";
+                }
+            } catch(e) {
+                showToast('Network error while recording reading.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Submit & Calculate Bill";
+            }
+        }
+
+        async function handleStaffConnection(e) {
+            e.preventDefault();
+            const data = {
+                accountNumber: document.getElementById('stf-c-acc').value.trim(),
+                connectionAddress: document.getElementById('stf-c-addr').value.trim(),
+                connectionStatus: 'Active',
+                userId: parseInt(document.getElementById('stf-c-uid').value)
+            };
+            try {
+                const res = await authFetch('/api/Staff/connection', {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) showToast('Water connection provisioned.', 'success');
+                else {
+                    const err = await res.json();
+                    showToast(err.message || 'Failed to provision connection.', 'error');
+                }
+            } catch(e) {
+                showToast('Network error creating connection.', 'error');
+            }
+        }
+
+        async function loadStaffFeedbacks() {
+            try {
+                const res = await authFetch('/api/Staff/feedbacks');
+                if (res.ok) {
+                    const list = await res.json();
+                    document.getElementById('stf-feedback-box').innerHTML = list.length ? list.map(f => `
+                        <div class="p-2.5 border rounded-xl bg-slate-50">
+                            <div class="flex justify-between font-bold text-slate-800">
+                                <span>Acc: ${f.accountNumber}</span>
+                                <span class="text-blue-700">${f.status}</span>
+                            </div>
+                            <p class="text-slate-600 mt-1">${f.message}</p>
+                        </div>
+                    `).join('') : `<p class="text-slate-400">No active complaints.</p>`;
+                }
+            } catch(e) { }
+        }
+
+        async function loadStaffCustomers() {
+            try {
+                const res = await authFetch('/api/Staff/customers');
+                if (res.ok) {
+                    const custs = await res.json();
+                    document.getElementById('stf-cust-rows').innerHTML = custs.map(c => `
+                        <tr><td class="py-1.5 font-bold">${c.id}</td><td>${c.username}</td><td>${c.email}</td><td>${c.phone}</td></tr>
+                    `).join('');
+                }
+            } catch(e) { }
+        }
+
+        async function loadStaffPayments() {
+            try {
+                const res = await authFetch('/api/Staff/payments');
+                if (res.ok) {
+                    const pays = await res.json();
+                    document.getElementById('stf-pay-rows').innerHTML = pays.map(p => `
+                        <tr><td class="py-1.5 font-semibold">${p.accountNumber}</td><td>LKR ${p.amount.toFixed(2)}</td><td>${p.paymentMethod}</td><td><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">${p.paymentStatus}</span></td></tr>
+                    `).join('');
+                }
+            } catch(e) { }
+        }
+
+        async function loadAdminDashboard() {
+            try {
+                const r = await authFetch('/api/Admin/reports/summary');
+                if (r.ok) {
+                    const m = await r.json();
+                    document.getElementById('adm-metric-users').innerText = m.totalRegisteredUsers;
+                    document.getElementById('adm-metric-conn').innerText = m.activeConnections;
+                    document.getElementById('adm-metric-billed').innerText = `LKR ${m.totalRevenueBilledLKR.toFixed(2)}`;
+                    document.getElementById('adm-metric-col').innerText = `LKR ${m.totalRevenueCollectedLKR.toFixed(2)}`;
+                }
+
+                const t = await authFetch('/api/Admin/configuration');
+                if (t.ok) {
+                    const configs = await t.json();
+                    document.getElementById('adm-tariff-display').innerHTML = configs.map(c => `
+                        <p>${c.description}: <b>${c.configValue}</b></p>
+                    `).join('');
+                }
+                loadAdminLogs();
+            } catch(e) { }
+        }
+
+        async function handleAdminRoleAssign() {
+            const uid = document.getElementById('adm-role-uid').value;
+            const role = document.getElementById('adm-role-val').value;
+            try {
+                const res = await authFetch(`/api/Admin/assign-role/${uid}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(role)
+                });
+                if (res.ok) { 
+                    showToast('Role updated successfully.', 'success'); 
+                    loadAdminLogs(); 
+                } else {
+                    showToast('Role update failed.', 'error');
+                }
+            } catch(e) {
+                showToast('Network error.', 'error');
+            }
+        }
+
+        async function handleAdminBackup() {
+            try {
+                const res = await authFetch('/api/Admin/database/backup', { method: 'POST' });
+                if (res.ok) { const d = await res.json(); showToast(d.message, 'success'); }
+            } catch(e) {
+                showToast('Backup request failed.', 'error');
+            }
+        }
+
+        async function handleAdminRestore() {
+            try {
+                const res = await authFetch('/api/Admin/database/restore', { method: 'POST' });
+                if (res.ok) { const d = await res.json(); showToast(d.message, 'success'); }
+            } catch(e) {
+                showToast('Restore request failed.', 'error');
+            }
+        }
+
+        async function loadAdminLogs() {
+            try {
+                const res = await authFetch('/api/Admin/activity-logs');
+                if (res.ok) {
+                    const logs = await res.json();
+                    document.getElementById('adm-logs-rows').innerHTML = logs.length ? logs.map(l => `
+                        <tr><td class="py-1.5 text-slate-400">${new Date(l.timestamp).toLocaleTimeString()}</td><td class="font-bold">${l.performedBy}</td><td>${l.action}</td></tr>
+                    `).join('') : '<tr><td colspan="3" class="py-2 text-slate-400">No activity logs recorded.</td></tr>';
+                }
+            } catch(e) { }
+        }
+
+        function updatePartnerKey() {
+            const select = document.getElementById('partner-channel-select');
+            document.getElementById('partner-apikey').value = select.value;
+        }
+
+        async function handlePartnerQuery() {
+            const key = document.getElementById('partner-apikey').value;
+            const acc = document.getElementById('partner-bill-acc').value.trim();
+            const feedback = document.getElementById('partner-feedback-msg');
+            const billBox = document.getElementById('partner-bill-box');
+            const successBox = document.getElementById('partner-success-box');
+
+            feedback.classList.add('hidden');
+            billBox.classList.add('hidden');
+            successBox.classList.add('hidden');
+
+            if (!acc) {
+                feedback.className = "p-3.5 rounded-2xl text-xs font-semibold bg-rose-50 text-rose-800 border border-rose-200";
+                feedback.innerText = "Please enter a water account number.";
+                feedback.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/api/Partner/bill/${encodeURIComponent(acc)}`, {
+                    headers: { 'X-API-KEY': key }
+                });
+
+                if (res.ok) {
+                    activePartnerBill = await res.json();
+                    document.getElementById('pt-acc').innerText = activePartnerBill.accountNumber;
+                    document.getElementById('pt-amt').innerText = `LKR ${(activePartnerBill.outstandingBalance ?? activePartnerBill.amount).toFixed(2)}`;
+                    billBox.classList.remove('hidden');
+                } else if (res.status === 401) {
+                    feedback.className = "p-3.5 rounded-2xl text-xs font-semibold bg-rose-50 text-rose-800 border border-rose-200";
+                    feedback.innerText = "Security Alert: Unauthorized Bank API Key. Request was rejected by NWSDB Gateway.";
+                    feedback.classList.remove('hidden');
+                } else {
+                    feedback.className = "p-3.5 rounded-2xl text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200";
+                    feedback.innerText = `No pending unpaid bills found for account ${acc}. It has already been cleared or settled.`;
+                    feedback.classList.remove('hidden');
+                }
+            } catch(e) {
+                feedback.className = "p-3.5 rounded-2xl text-xs font-semibold bg-rose-50 text-rose-800 border border-rose-200";
+                feedback.innerText = "Failed to communicate with NWSDB Core API.";
+                feedback.classList.remove('hidden');
+            }
+        }
+
+        async function handlePartnerPay() {
+            if (!activePartnerBill) return;
+            const key = document.getElementById('partner-apikey').value;
+            const amountToPay = activePartnerBill.outstandingBalance ?? activePartnerBill.amount;
+
+            try {
+                const res = await fetch(`${API_BASE}/api/Partner/pay`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-API-KEY': key },
+                    body: JSON.stringify({ billId: activePartnerBill.id, amount: amountToPay, paymentMethod: 'PartnerGateway' })
+                });
+
+                if (res.ok) {
+                    const rec = await res.json();
+                    document.getElementById('partner-bill-box').classList.add('hidden');
+                    const successBox = document.getElementById('partner-success-box');
+                    document.getElementById('pt-rec-no').innerText = rec.receiptNumber;
+                    document.getElementById('pt-rec-amt').innerText = `LKR ${rec.amountPaid.toFixed(2)}`;
+                    successBox.classList.remove('hidden');
+                    showToast('Partner clearance authorized.', 'success');
+                } else {
+                    showToast('Payment processing rejected by NWSDB engine.', 'error');
+                }
+            } catch(e) {
+                showToast('Gateway communication error.', 'error');
+            }
+        }
+    </script>
+</body>
+</html>
