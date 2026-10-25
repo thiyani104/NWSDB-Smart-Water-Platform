@@ -1,0 +1,22 @@
+## .NET build output
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.vscode/
+*.log
+
+## Secrets and local config -- never commit these
+.env
+appsettings.*.local.json
+secrets.json
+
+## Test output
+TestResults/
+coverage/
+
+## Coursework / large artefacts
+*.zip
+*.docx
+*.bak
