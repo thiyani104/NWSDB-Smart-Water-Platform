@@ -1,0 +1,167 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NWSDB.API</name>
+    </assembly>
+    <members>
+        <member name="M:NWSDB.API.Controllers.AdminController.RegisterStaff(NWSDB.API.DTOs.RegisterRequest)">
+            <summary>
+            Provision a new internal Staff account (Restricted strictly to Administrator).
+            </summary>
+        </member>
+        <member name="M:NWSDB.API.Controllers.AuthController.Register(NWSDB.API.DTOs.RegisterRequest)">
+            <summary>
+            Public customer registration endpoint.
+            The role is always Customer; any role value in the payload is ignored (the DTO has no Role property).
+            </summary>
+        </member>
+        <member name="M:NWSDB.API.Controllers.AuthController.Login(NWSDB.API.DTOs.LoginRequest)">
+            <summary>
+            User login endpoint returning an authenticated JWT Bearer token and user details.
+            </summary>
+        </member>
+        <member name="M:NWSDB.API.Controllers.BillingController.RecordReading(NWSDB.API.DTOs.MeterReadingRequest)">
+            <summary>
+            Records a new meter reading and triggers automatic bill generation.
+            Restricted to field staff and administrators.
+            </summary>
+        </member>
+        <member name="M:NWSDB.API.Controllers.BillingController.GetBills(System.String)">
+            <summary>
+            Retrieves billing records for a specific water connection account.
+            </summary>
+        </member>
+        <member name="M:NWSDB.API.Controllers.PartnerController.QueryBillByAccount(System.String,System.String)">
+            <summary>
+            Third-party banking query endpoint for pending bills.
+            Secured via X-API-KEY header validation.
+            </summary>
+        </member>
+        <member name="M:NWSDB.API.Controllers.PartnerController.ProcessThirdPartyPayment(NWSDB.API.DTOs.PaymentRequest,System.String)">
+            <summary>
+            B2B payment settlement endpoint for commercial banks and third-party partners.
+            </summary>
+        </member>
+        <member name="M:NWSDB.API.Controllers.PaymentController.MakePayment(NWSDB.API.DTOs.PaymentRequest)">
+            <summary>
+            Processes online bill settlement and issues a transaction receipt.
+            Guarded against overpayment, zero amounts, and paying settled bills.
+            </summary>
+        </member>
+        <member name="M:NWSDB.API.Controllers.PaymentController.GetReceipt(System.Int32)">
+            <summary>
+            Retrieves a verifiable receipt by payment identifier.
+            </summary>
+        </member>
+        <member name="T:NWSDB.API.Data.Services.IAccountAccessService">
+            <summary>
+            Object-level authorization: decides whether the current principal may touch a given
+            water account, bill or payment. Staff and Admin may access everything; customers may
+            only access resources that belong to a connection they own.
+            </summary>
+        </member>
+        <member name="M:NWSDB.API.Data.Services.IAuthService.RegisterAsync(NWSDB.API.DTOs.RegisterRequest,System.String)">
+            <summary>
+            Creates a user. The role is a server-side decision and is never read from the request.
+            </summary>
+        </member>
+        <member name="T:NWSDB.API.Data.Services.Tariff">
+            <summary>Tariff values, normally loaded from the SystemConfiguration table.</summary>
+        </member>
+        <member name="M:NWSDB.API.Data.Services.Tariff.#ctor(System.Decimal,System.Decimal,System.Int32,System.Decimal)">
+            <summary>Tariff values, normally loaded from the SystemConfiguration table.</summary>
+        </member>
+        <member name="M:NWSDB.API.Data.Services.TariffCalculator.Calculate(System.Double,NWSDB.API.Data.Services.Tariff)">
+            <summary>Bill = fixed monthly charge + (units consumed x unit rate), rounded to 2 decimals.</summary>
+        </member>
+        <member name="T:NWSDB.API.Data.Services.TariffProvider">
+            <summary>Reads tariffs from the SystemConfiguration table, falling back to defaults per key.</summary>
+        </member>
+        <member name="T:NWSDB.API.Data.DbInitializer">
+            <summary>
+            Startup tasks: optional migration and rotation of the seeded administrator credential.
+            The EF seed data ships a well-known placeholder hash for the default admin account;
+            when Seed:AdminPassword is configured (user-secrets / environment variable) and the
+            admin still has a placeholder hash, it is replaced with a hash of the configured password.
+            </summary>
+        </member>
+        <member name="T:NWSDB.API.DTOs.RegisterRequest">
+            <summary>
+            Registration payload. Deliberately has no Role property: the role is decided by the
+            server (Customer for public sign-up, Staff via the admin endpoint), never by the client.
+            </summary>
+        </member>
+        <member name="T:NWSDB.API.Migrations.InitialCreate">
+            <inheritdoc />
+        </member>
+        <member name="M:NWSDB.API.Migrations.InitialCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:NWSDB.API.Migrations.InitialCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:NWSDB.API.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:NWSDB.API.Migrations.AddDomainEntities">
+            <inheritdoc />
+        </member>
+        <member name="M:NWSDB.API.Migrations.AddDomainEntities.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:NWSDB.API.Migrations.AddDomainEntities.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:NWSDB.API.Migrations.AddDomainEntities.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:NWSDB.API.Migrations.AddFeedbackAndActivityLogs">
+            <inheritdoc />
+        </member>
+        <member name="M:NWSDB.API.Migrations.AddFeedbackAndActivityLogs.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:NWSDB.API.Migrations.AddFeedbackAndActivityLogs.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:NWSDB.API.Migrations.AddFeedbackAndActivityLogs.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:NWSDB.API.Migrations.SyncLatestSchema">
+            <inheritdoc />
+        </member>
+        <member name="M:NWSDB.API.Migrations.SyncLatestSchema.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:NWSDB.API.Migrations.SyncLatestSchema.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:NWSDB.API.Migrations.SyncLatestSchema.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:NWSDB.API.Migrations.SeedDefaultAdmin">
+            <inheritdoc />
+        </member>
+        <member name="M:NWSDB.API.Migrations.SeedDefaultAdmin.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:NWSDB.API.Migrations.SeedDefaultAdmin.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:NWSDB.API.Migrations.SeedDefaultAdmin.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:NWSDB.API.Migrations.SeedAdminAndFixWarnings">
+            <inheritdoc />
+        </member>
+        <member name="M:NWSDB.API.Migrations.SeedAdminAndFixWarnings.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:NWSDB.API.Migrations.SeedAdminAndFixWarnings.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:NWSDB.API.Migrations.SeedAdminAndFixWarnings.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>
